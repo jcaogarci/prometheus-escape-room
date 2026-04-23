@@ -10,6 +10,24 @@
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=VT323&display=swap" rel="stylesheet">
 </head>
 <body class="landing-body">
+  <script>
+  (function() {
+    const VALID_TOKENS = [
+      // Genera tokens únicos por cada venta — puedes añadir tantos como quieras
+      // Formato: 'TOKEN': usos_maximos
+    ];
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token') || sessionStorage.getItem('access_token');
+
+    if (!token || !VALID_TOKENS.includes(token)) {
+      window.location.href = 'https://tu-tienda.gumroad.com/l/prometheus';
+      return;
+    }
+    
+    sessionStorage.setItem('access_token', token);
+  })();
+</script>
 
   <!-- Fondo de partículas/grid -->
   <div class="grid-bg"></div>
