@@ -72,14 +72,14 @@ const HINTS = {
     'Usuario: NEXUS | Contraseña: PR0METHEUS (la O es un cero)'
   ],
   'p2-caesar': [
-    'Este texto parece desplazado. Cada letra ha sido movida el mismo número de posiciones en el alfabeto.',
-    'El cifrado César clásico usa desplazamiento 3. Prueba a restar 3 a cada letra: D→A, E→B, etc.',
-    'La palabra clave es: INFILTRADO — introduce esa palabra'
+    'El texto está cifrado con un desplazamiento fijo. Cada letra se ha movido el mismo número de posiciones en el alfabeto.',
+    'En el cifrado César con desplazamiento 3, para descifrar restas 3 a cada letra: D→A, F→C, H→E...',
+    'La respuesta es: ACCESO'
   ],
   'p3-sequence': [
-    'Observa los números: cada uno tiene una relación matemática con el anterior.',
-    'Es una secuencia de Fibonacci modificada: cada número es la suma de los dos anteriores más 1.',
-    'La secuencia es: 1, 2, 4, 7, 12, 20... El siguiente es: 33'
+    'Observa la diferencia entre cada número consecutivo: 1, 2, 3, 5, 8... ¿te suena ese patrón?',
+    'Las diferencias entre números forman una secuencia de Fibonacci. La siguiente diferencia es 13.',
+    'La respuesta es: 33'
   ],
   'p4-email': [
     'Lee todos los emails disponibles. Uno contiene un código fragmentado.',
@@ -102,29 +102,29 @@ const HINTS = {
     'Usa el comando: decrypt --key=OMEGA --file=core.enc'
   ],
   'p8-cipher2': [
-    'Este no es un cifrado César. Las letras han sido sustituidas por otras según una tabla.',
-    'La clave de la tabla está en el inventario si has encontrado el "Documento K-7".',
-    'La tabla dice: A=Z, B=Y, C=X... Es un cifrado Atbash (inversión del alfabeto). La respuesta es: NUCLEUS'
+    'No es César. Aquí cada letra se ha reemplazado por su "espejo" en el alfabeto. La primera se convierte en la última, la segunda en la penúltima...',
+    'Se llama cifrado Atbash. La tabla es: A↔Z, B↔Y, C↔X, D↔W, E↔V, F↔U... aplícala letra a letra.',
+    'La respuesta es: NUCLEO'
   ],
   'p9-numpad': [
-    'El código de 6 dígitos está relacionado con las fechas de los emails que ya has leído.',
-    'Suma las fechas de los tres emails de la Fase 2. Día + Mes + Año (solo últimas 2 cifras).',
-    'El código es: 7 + 3 + 1 + 2 + 2 + 5 = usa los dígitos: 073125 → pero reordenados por prioridad: 312507'
+    'El código está basado en la fecha que aparece en todos los emails. Fíjate en el formato.',
+    'La fecha de los emails es 03/11/2031. El sistema usa formato MES-DIA-AÑO con solo los 2 últimos dígitos del año.',
+    'La respuesta es: 110331 (mes 11, día 03, año 31)'
   ],
   'p10-pattern': [
-    'El patrón se activa en una secuencia específica. No es aleatorio — sigue un camino.',
-    'Activa las luces en orden de las manecillas del reloj, empezando por arriba.',
-    'La secuencia correcta es: arriba-centro, derecha-centro, abajo-centro, izquierda-centro'
+    'Los nodos especiales están señalados con flechas (▲►▼◄). La descripción dice "agujas del reloj desde arriba".',
+    'Pulsa en este orden: la flecha que apunta hacia ARRIBA, luego DERECHA, luego ABAJO, luego IZQUIERDA.',
+    'Secuencia correcta: ▲ → ► → ▼ → ◄'
   ],
   'p11-decrypt': [
-    'El mensaje final usa una combinación de los dos cifrados anteriores.',
-    'Primero aplica Atbash, luego César con desplazamiento 7.',
-    'El mensaje descifrado es: OMEGA-DESTRUCCION-ACTIVA'
+    'Este cifrado es el mismo que usaste en el Puzzle 2 pero con un desplazamiento diferente. ROT13 desplaza exactamente 13 posiciones — y tiene la propiedad de que aplicarlo dos veces devuelve el original.',
+    'Aplica ROT13 a cada letra del texto cifrado: A↔N, B↔O, C↔P, D↔Q, E↔R, F↔S, G↔T, H↔U, I↔V, J↔W, K↔X, L↔Y, M↔Z.',
+    'La respuesta es: CHIMERA'
   ],
   'p12-final': [
-    'Recuerda todo lo que has aprendido. El código final combina elementos de cada fase.',
-    'Toma la primera letra de cada código que has introducido hasta ahora.',
-    'El código de destrucción es: PROMETHEUS (usa las iniciales de cada solución en orden)'
+    'Has estado mirando este nombre desde el principio. Está en el título, en los mensajes, en todas partes.',
+    'El sistema que intentas destruir se llama igual que la operación. Está en la pantalla de inicio.',
+    'La respuesta es: PROMETHEUS'
   ]
 };
 
@@ -180,16 +180,16 @@ Este sistema registra todas las interacciones.`
     phase: 1,
     title: 'MENSAJE INTERCEPTADO — CIFRADO CÉSAR',
     phaseTag: '// FASE 1 — DESCIFRADO //',
-    description: 'Al ganar acceso, encuentras un mensaje de comunicaciones internas. Está cifrado. Parece un cifrado clásico de sustitución por desplazamiento. Descífralo para obtener la primera pista sobre la estructura de PROMETHEUS.',
+    description: 'Al ganar acceso encuentras un mensaje cifrado en las comunicaciones internas. El emisor usó el método más antiguo del mundo: desplazar cada letra del alfabeto un número fijo de posiciones. Descífralo para obtener tu primera clave de acceso.',
     type: 'cipher',
-    cipherText: 'LQILOGUDGR',
-    instruction: 'Descifra el texto anterior (cifrado César, desplazamiento 3). Introduce la palabra resultante.',
-    answer: 'INFILTRADO',
+    cipherText: 'DFFHVR',
+    instruction: 'Cifrado César — desplazamiento 3. Para descifrar, resta 3 a cada letra (D→A, F→C, H→E...). Introduce la palabra resultante.',
+    answer: 'ACCESO',
     caseSensitive: false,
     onSolve: () => {
-      addInventoryItem('📜 Mensaje descifrado');
-      addLog('Mensaje descifrado: INFILTRADO', 'success');
-      addLog('Registro de comms: alguien sabía que venías.', 'narrative');
+      addInventoryItem('📜 Clave: ACCESO');
+      addLog('Mensaje descifrado: ACCESO', 'success');
+      addLog('Alguien dejó este mensaje intencionadamente. ¿Quién?', 'narrative');
     }
   },
 
@@ -198,7 +198,7 @@ Este sistema registra todas las interacciones.`
     phase: 1,
     title: 'PROTOCOLO DE VERIFICACIÓN — SECUENCIA',
     phaseTag: '// FASE 1 — VERIFICACIÓN //',
-    description: 'El sistema exige verificar tu identidad con una secuencia de protocolo. Un operador legítimo habría memorizado la continuación de esta progresión matemática. ¿Puedes calcularla?',
+    description: 'El sistema exige una verificación matemática. Un operador legítimo sabría continuar esta secuencia de protocolo. Analiza las diferencias entre números consecutivos — hay un patrón oculto en ellas.',
     type: 'sequence',
     sequence: [1, 2, 4, 7, 12, 20, '?'],
     instruction: '¿Cuál es el siguiente número de la secuencia?',
@@ -282,7 +282,7 @@ Sistema de rotación reiniciado.
     description: 'El sistema muestra una rejilla de nodos de red. Según el manual de acceso interno, solo los nodos en configuración "L" forman el vector de acceso válido. Activa los nodos correctos.',
     type: 'grid',
     gridSize: 3,
-    instruction: 'Activa los nodos que forman la letra "L" en la rejilla (3×3). Posiciones: 1, 4, 7, 8, 9 (izquierda y fila inferior).',
+    instruction: 'Activa los nodos que formen una letra del alfabeto cuando los veas en conjunto. El manual de red describe la configuración como "forma de ángulo recto descendente".',
     correctPattern: [0, 3, 6, 7, 8],  // índices base 0
     onSolve: () => {
       addInventoryItem('🗺 Mapa de red activo');
@@ -297,7 +297,7 @@ Sistema de rotación reiniciado.
     phaseTag: '// FASE 2 — CONEXIÓN FÍSICA //',
     description: 'En el servidor físico hay un módulo de conexiones desconectado. Cada cable debe conectarse al receptor correcto según la documentación de frecuencias del sistema. Un error puede quemar el módulo.',
     type: 'wires',
-    instruction: 'Conecta cada cable a su receptor correcto. El orden es: ROJO→DELTA, AZUL→ALPHA, VERDE→GAMMA, AMARILLO→BETA',
+    instruction: 'Conecta cada cable a su receptor según las frecuencias. Regla del sistema: frecuencia más alta va al receptor de mayor rango alfabético, la más baja al menor.',
     wires: [
       { id: 'red',    color: '#ff4455', label: 'ROJO', freq: '440Hz', target: 'DELTA'  },
       { id: 'blue',   color: '#4488ff', label: 'AZUL', freq: '220Hz', target: 'ALPHA'  },
@@ -405,19 +405,18 @@ Estado: LISTO PARA EJECUTAR`,
   {
     id: 'p8-cipher2',
     phase: 3,
-    title: 'MENSAJE DEL INFILTRADO — CIFRADO ATBASH',
+    title: 'MENSAJE DE NEXUS_7 — CIFRADO ATBASH',
     phaseTag: '// FASE 3 — CONTACTO EXTERNO //',
-    description: 'Recibes un mensaje cifrado de NEXUS_7, el misterioso contacto que te avisó antes. El mensaje usa cifrado Atbash (inversión del alfabeto: A↔Z, B↔Y, etc.). Descífralo para obtener el siguiente código.',
+    description: 'Recibes un nuevo mensaje de NEXUS_7. Esta vez usa un cifrado diferente al César: el cifrado Atbash, que consiste en invertir el alfabeto completo. La primera letra (A) se convierte en la última (Z), la B en Y, la C en X, y así sucesivamente.',
     type: 'cipher',
-    cipherText: 'MFXOVFH',
-    instruction: 'Descifra usando Atbash (inversión del alfabeto: A=Z, B=Y, C=X...). Introduce la palabra resultante.',
-    hint: 'En Atbash: N→M, U→F, C→X, L→O, E→V, U→F, S→H',
-    answer: 'NUCLEUS',
+    cipherText: 'MFXOVL',
+    instruction: 'Descifra usando Atbash: invierte el alfabeto (A↔Z, B↔Y, C↔X, D↔W...). Introduce la palabra resultante.',
+    answer: 'NUCLEO',
     caseSensitive: false,
     onSolve: () => {
-      addInventoryItem('📩 Código NEXUS_7: NUCLEUS');
-      addLog('Mensaje de NEXUS_7 descifrado: NUCLEUS', 'success');
-      addLog('¿Quién es NEXUS_7 y por qué te ayuda?', 'narrative');
+      addInventoryItem('📩 Clave NEXUS_7: NUCLEO');
+      addLog('Mensaje de NEXUS_7 descifrado: NUCLEO', 'success');
+      addLog('NEXUS_7 conoce el sistema por dentro. ¿Es un aliado?', 'narrative');
     }
   },
 
@@ -426,10 +425,10 @@ Estado: LISTO PARA EJECUTAR`,
     phase: 3,
     title: 'CAJA FUERTE DIGITAL — CÓDIGO DE 6 DÍGITOS',
     phaseTag: '// FASE 3 — ACCESO FÍSICO //',
-    description: 'Encuentras una caja fuerte digital que contiene el módulo de destrucción de PROMETHEUS. Requiere un código de 6 dígitos. Según el manual técnico, el código se genera con las fechas de los reportes de actividad: día + mes de activación + año (dos últimos dígitos) de cada fase.',
+    description: 'Encuentras una caja fuerte digital que contiene el módulo de destrucción de PROMETHEUS. Requiere un código de 6 dígitos.\n\nEn la tapa hay una nota grabada: "FORMATO DE ACCESO: MES-DÍA-AÑO. Fecha de activación del sistema disponible en los registros de correo."',
     type: 'numpad',
     display: '',
-    instruction: 'Introduce el código de 6 dígitos: usa día (03), mes (11), año últimos 2 (31) → 031131. Pero el sistema los reordena: mes-día-año: 110331',
+    instruction: 'Usa la fecha de los emails (03/11/2031) en formato MES-DÍA-AÑO con solo los 2 últimos dígitos del año.',
     answer: '110331',
     onSolve: () => {
       addInventoryItem('🔓 Módulo de destrucción');
@@ -464,18 +463,17 @@ Estado: LISTO PARA EJECUTAR`,
   {
     id: 'p11-decrypt',
     phase: 4,
-    title: 'PROTOCOLO OMEGA — CÓDIGO DE AUTORIZACIÓN',
+    title: 'ÚLTIMO MENSAJE DE NEXUS_7 — CIFRADO ROT13',
     phaseTag: '// FASE 4 — AUTORIZACIÓN //',
-    description: `El sistema de destrucción requiere un código de autorización verbal que debes descifrar del mensaje final de PROMETHEUS. Usa ambos cifrados que has aprendido:\n1. Aplica Atbash al texto cifrado\n2. Luego aplica César con desplazamiento 7 al resultado`,
+    description: 'NEXUS_7 te envía un último mensaje antes del final. Usa ROT13: el mismo cifrado César que ya conoces, pero con desplazamiento exacto de 13 posiciones. Su ventaja: aplicarlo dos veces devuelve el texto original. A↔N, B↔O, C↔P... M↔Z.',
     type: 'cipher',
-    cipherText: 'ITVX-NKWMILZZORE-HZBPC',
-    hint: 'Paso 1: Atbash | Paso 2: César +7 (inverso, resta 7)',
-    instruction: 'Aplica Atbash y luego César inverso (−7). Introduce el resultado (usa guiones).',
-    answer: 'OMEGA-DESTRUCCION-ACTIVA',
+    cipherText: 'PUVZREN',
+    instruction: 'Descifra con ROT13 (César desplazamiento 13): cada letra se sustituye por la que está 13 posiciones más adelante — o atrás, es simétrico. Introduce la palabra resultante.',
+    answer: 'CHIMERA',
     caseSensitive: false,
     onSolve: () => {
-      addInventoryItem('⚙ Código Omega: ACTIVA');
-      addLog('Código de autorización Omega verificado.', 'success');
+      addInventoryItem('⚙ Código final: CHIMERA');
+      addLog('Mensaje final de NEXUS_7 descifrado: CHIMERA', 'success');
       addLog('PROMETHEUS: "Así que has llegado hasta aquí..."', 'narrative');
     }
   },
@@ -483,12 +481,11 @@ Estado: LISTO PARA EJECUTAR`,
   {
     id: 'p12-final',
     phase: 4,
-    title: 'CÓDIGO DE DESTRUCCIÓN FINAL — PROMETHEUS',
+    title: 'CÓDIGO DE DESTRUCCIÓN FINAL',
     phaseTag: '// FASE 4 — DESTRUCCIÓN //',
-    description: `Estás frente al núcleo de PROMETHEUS. El sistema de destrucción está listo.\n\nEl código final se forma tomando la PRIMERA LETRA de cada solución, en orden:\n• P1: PROMETHEUS → P\n• P2: INFILTRADO → I\n• P3: 33 → (letra en posición 33 del alfabeto mod 26) → G... wait.\n\nEspera. NEXUS_7 te dejó una nota: "Las iniciales de los títulos de fase forman la palabra. Lee los títulos. Primera letra de cada título de puzzle de la fase 4."`,
+    description: 'Estás frente al núcleo de PROMETHEUS. El sistema de destrucción está en línea y esperando la autorización final.\n\nUn último mensaje de NEXUS_7 aparece en pantalla:\n\n"El código es el nombre de aquello que destruyes. Ha estado delante de ti desde el primer segundo."',
     type: 'finalcode',
-    hint: 'Titles fase 4: Activación → A | Protocolo → P | Código → C... Piensa diferente: el mensaje de NEXUS_7 dijo "las primeras letras de cada fase". Las fases son: A(cceso), N(úcleo), C(himera), D(estrucción) → ANCD no. Relée el briefing original.',
-    instruction: 'El código es el nombre del sistema que intentas destruir. Está en todas partes desde el principio.',
+    instruction: 'Introduce el nombre del sistema que has venido a destruir. Sin espacios, en mayúsculas.',
     answer: 'PROMETHEUS',
     caseSensitive: false,
     isFinal: true,
