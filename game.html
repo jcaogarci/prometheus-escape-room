@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PROMETHEUS — Terminal Activa</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=VT323&display=swap" rel="stylesheet">
+</head>
+<body class="game-body">
+
+  <div class="scan-lines"></div>
+  <div class="grid-bg"></div>
+
+  <!-- OVERLAY DE CARGA INICIAL -->
+  <div id="bootOverlay" class="boot-overlay">
+    <div class="boot-content">
+      <div class="boot-logo">PROMETHEUS</div>
+      <div id="bootLog" class="boot-log"></div>
+      <div class="boot-bar-container">
+        <div id="bootBar" class="boot-bar"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ALERTA DE EVENTO DINÁMICO -->
+  <div id="eventAlert" class="event-alert hidden">
+    <div class="event-alert-inner">
+      <div class="event-alert-title" id="eventAlertTitle">⚠ ALERTA DEL SISTEMA</div>
+      <div class="event-alert-msg" id="eventAlertMsg"></div>
+      <button class="event-close-btn" onclick="closeEventAlert()">[ CERRAR ]</button>
+    </div>
+  </div>
+
+  <!-- MODAL DE PISTA -->
+  <div id="hintModal" class="hint-modal hidden">
+    <div class="hint-modal-inner">
+      <div class="hint-header">// ASISTENCIA DE MISIÓN //</div>
+      <div id="hintText" class="hint-text"></div>
+      <div id="hintCost" class="hint-cost"></div>
+      <button class="hint-close-btn" onclick="closeHint()">[ ENTENDIDO ]</button>
+    </div>
+  </div>
+
+  <!-- MODAL DE FINAL -->
+  <div id="endingModal" class="ending-modal hidden">
+    <div class="ending-inner">
+      <div id="endingIcon" class="ending-icon"></div>
+      <div id="endingTitle" class="ending-title"></div>
+      <div id="endingText" class="ending-text"></div>
+      <div id="endingStats" class="ending-stats"></div>
+      <button class="ending-btn" onclick="replayGame()">[ REINICIAR MISIÓN ]</button>
+      <button class="ending-btn secondary" onclick="window.location.href='index.html'">[ MENÚ PRINCIPAL ]</button>
+    </div>
+  </div>
+
+  <!-- HUD SUPERIOR -->
+  <div class="game-hud">
+    <div class="hud-left">
+      <span class="hud-label">AGENTE:</span>
+      <span id="hudAgent" class="hud-value">—</span>
+    </div>
+    <div class="hud-center">
+      <div class="timer-block">
+        <div class="timer-label">TIEMPO RESTANTE</div>
+        <div id="mainTimer" class="main-timer">90:00</div>
+        <div id="timerStatus" class="timer-status">EN CURSO</div>
+      </div>
+    </div>
+    <div class="hud-right">
+      <span class="hud-label">FASE:</span>
+      <span id="hudPhase" class="hud-value">1/4</span>
+      <span class="hud-separator">|</span>
+      <span class="hud-label">SCORE:</span>
+      <span id="hudScore" class="hud-value">0</span>
+    </div>
+  </div>
+
+  <!-- BARRA DE PROGRESO -->
+  <div class="progress-bar-container">
+    <div id="progressBar" class="progress-bar-fill"></div>
+    <div class="progress-markers">
+      <span class="marker" style="left:25%">FASE 1</span>
+      <span class="marker" style="left:50%">FASE 2</span>
+      <span class="marker" style="left:75%">FASE 3</span>
+      <span class="marker" style="left:96%">FINAL</span>
+    </div>
+  </div>
+
+  <!-- ÁREA PRINCIPAL DEL JUEGO -->
+  <div class="game-wrapper">
+
+    <!-- PANEL IZQUIERDO: Narrativa / Log -->
+    <aside class="side-panel left-panel">
+      <div class="panel-header">// REGISTRO DEL SISTEMA //</div>
+      <div id="narrativeLog" class="narrative-log">
+        <div class="log-entry system">Sistema inicializado.</div>
+      </div>
+      <div class="panel-header mt">// INVENTARIO //</div>
+      <div id="inventory" class="inventory-panel">
+        <div class="inv-empty">Sin elementos.</div>
+      </div>
+    </aside>
+
+    <!-- PANEL CENTRAL: Puzzle activo -->
+    <main class="center-panel">
+      <div id="puzzleContainer" class="puzzle-container">
+        <!-- Los puzzles se inyectan aquí dinámicamente -->
+      </div>
+    </main>
+
+    <!-- PANEL DERECHO: Controles / Pistas -->
+    <aside class="side-panel right-panel">
+      <div class="panel-header">// CONTROLES //</div>
+      <div class="control-buttons">
+        <button class="ctrl-btn" onclick="requestHint()">
+          <span class="ctrl-icon">?</span>
+          SOLICITAR PISTA
+          <span id="hintCount" class="hint-count">(3 disp.)</span>
+        </button>
+        <button class="ctrl-btn secondary" onclick="toggleNotes()">
+          <span class="ctrl-icon">✎</span>
+          MIS NOTAS
+        </button>
+        <button class="ctrl-btn danger" onclick="confirmAbort()">
+          <span class="ctrl-icon">✕</span>
+          ABORTAR MISIÓN
+        </button>
+      </div>
+
+      <div class="panel-header mt">// NOTAS DEL AGENTE //</div>
+      <textarea id="agentNotes" class="agent-notes" placeholder="Escribe aquí tus notas..."></textarea>
+
+      <div class="panel-header mt">// ESTADO MISIÓN //</div>
+      <div id="missionStatus" class="mission-status-list">
+        <div class="status-item locked" id="status-phase1">■ FASE 1: ACCESO INICIAL</div>
+        <div class="status-item locked" id="status-phase2">■ FASE 2: NÚCLEO INTERNO</div>
+        <div class="status-item locked" id="status-phase3">■ FASE 3: PROTOCOLO CHIMERA</div>
+        <div class="status-item locked" id="status-phase4">■ FASE 4: DESTRUCCIÓN</div>
+      </div>
+
+      <div class="panel-header mt">// INTENTOS FALLIDOS //</div>
+      <div id="failedAttempts" class="failed-attempts">
+        <div class="fail-bar"><div id="failFill" class="fail-fill" style="width:0%"></div></div>
+        <div id="failText" class="fail-text">0 / 10 máx.</div>
+      </div>
+    </aside>
+
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
