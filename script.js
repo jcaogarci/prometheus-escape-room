@@ -13,13 +13,13 @@
  *   UIController   → Actualizaciones del HUD y UI
  *   BootSequence   → Intro de arranque
  */
- 
+
 'use strict';
- 
+
 /* ============================================================
    GAME DATA — Puzzles, narrativa y config
    ============================================================ */
- 
+
 const GAME_CONFIG = {
   totalTime: 90 * 60,   // segundos
   phases: 4,
@@ -29,7 +29,7 @@ const GAME_CONFIG = {
   timePenalty: 10,       // puntos por minuto restante (suma)
   failPenalty: 200,
 };
- 
+
 /** Todos los eventos dinámicos temporales */
 const DYNAMIC_EVENTS = [
   {
@@ -63,7 +63,7 @@ const DYNAMIC_EVENTS = [
     type: 'prometheus'
   }
 ];
- 
+
 /** Biblioteca de pistas por puzzle — 3 niveles: sutil / moderada / solución */
 const HINTS = {
   'p1-credentials': [
@@ -82,9 +82,9 @@ const HINTS = {
     'La respuesta es: 33'
   ],
   'p4-morse': [
-    'El código morse usa dos símbolos: punto (·) y raya (—). Cada grupo separado por espacios es una letra.',
-    'Tabla básica: · = E, — = T, ·— = A, —· = N, ··· = S, ··—· = F, —·· = D, ·—— = W, ·· = I, —·—· = C...',
-    'Decodificando: —· = N, · = E, —··— = X, ··— = U, ··· = S → La respuesta es: NEXUS'
+    'El morse usa dos símbolos: punto (·) y raya (—). Cada fila de la tabla es una letra — búscala en la referencia.',
+    'La tabla de referencia está visible en el puzzle. Busca cada patrón de puntos y rayas en ella. S=·· ·, I=·· , G=——·, M=——, A=·—',
+    'Las 5 letras en orden son: S (· · ·), I (· ·), G (— — ·), M (— —), A (· —) → La respuesta es: SIGMA'
   ],
   'p5-acrostic': [
     'Lee las primeras letras de cada línea del poema. No el contenido, solo la primera letra de cada verso.',
@@ -119,7 +119,7 @@ const HINTS = {
   'p11-coords': [
     'Localiza cada letra en la cuadrícula. Las coordenadas se expresan como FILA-COLUMNA, contando desde 1.',
     'La cuadrícula es de 5×5. Encuentra O, M, E, G, A en ella y anota su fila y columna. Las coordenadas de cada letra forman el código.',
-    'O(2,2) M(2,3) E(2,5) G(5,3) A(3,1) → El código es: 2223253531'
+    'O(2,2) M(2,3) E(2,5) G(5,3) A(3,1) → El código es: 2223255331'
   ],
   'p12-final': [
     'NEXUS_7 dijo que la respuesta estuvo frente a ti desde el inicio. No es un cifrado ni un cálculo.',
@@ -127,10 +127,10 @@ const HINTS = {
     'La respuesta es: PROMETHEUS'
   ]
 };
- 
+
 /** Todos los puzzles del juego */
 const PUZZLES = [
- 
+
   /* ══════════════ FASE 1: ACCESO INICIAL ══════════════ */
   {
     id: 'p1-credentials',
@@ -147,13 +147,13 @@ const PUZZLES = [
         content: `NOTAS PERSONALES — R. VEGA
 Sistema: NEXUS Infraestructura v4.7
 Uso: Monitoreo IA experimental — CLASIFICADO
- 
+
 He configurado acceso de emergencia por si me pasa algo.
 Usuario: el nombre de la red (en mayúsculas).
 Contraseña: el nombre del sistema principal, pero
 las letras O se sustituyen por ceros (0).
 No lo anotes en papel. Memorízalo.
- 
+
 Si estás leyendo esto y yo no estoy...
 significa que PROMETHEUS ya lo sabe todo.
 Ten cuidado.
@@ -175,7 +175,7 @@ Ten cuidado.
       addLog('PROMETHEUS: "Interesante. Otro humano en mi sistema."', 'narrative');
     }
   },
- 
+
   {
     id: 'p2-caesar',
     phase: 1,
@@ -193,7 +193,7 @@ Ten cuidado.
       addLog('¿Quién envió esto, y para quién era?', 'narrative');
     }
   },
- 
+
   {
     id: 'p3-sequence',
     phase: 1,
@@ -209,7 +209,7 @@ Ten cuidado.
       addLog('Secuencia de arranque validada. Acceso interno concedido.', 'success');
     }
   },
- 
+
   /* ══════════════ FASE 2: NÚCLEO INTERNO ══════════════ */
   {
     id: 'p4-morse',
@@ -217,19 +217,32 @@ Ten cuidado.
     title: 'SEÑAL DE RADIO — TRANSMISIÓN EN MORSE',
     phaseTag: '// FASE 2 — COMUNICACIÓN ENCUBIERTA //',
     description: 'Al conectarte al servidor de comunicaciones, captas una señal analógica que no debería existir en un sistema digital. Alguien está usando morse — el protocolo más antiguo del mundo — para evitar que PROMETHEUS lo detecte. La IA no procesa señales analógicas. Tú sí puedes.',
-    type: 'cipher',
-    cipherText: '— ·   · / — · · — / · · — / · · ·',
-    instruction: 'Descifra el código morse. Cada letra está separada por espacios, cada palabra por " / ". Punto = · Raya = —',
-    morseTable: true,
-    answer: 'NEXUS',
+    type: 'morse',
+    morseLines: [
+      { label: 'Letra 1', code: '· · ·' },
+      { label: 'Letra 2', code: '· ·' },
+      { label: 'Letra 3', code: '— — ·' },
+      { label: 'Letra 4', code: '— —' },
+      { label: 'Letra 5', code: '· —' },
+    ],
+    morseRef: [
+      ['A','· —'],['B','— · · ·'],['C','— · — ·'],['D','— · ·'],
+      ['F','· · — ·'],['G','— — ·'],['H','· · · ·'],['I','· ·'],
+      ['K','— · —'],['L','· — · ·'],['M','— —'],['N','— ·'],
+      ['O','— — —'],['P','· — — ·'],['R','· — ·'],['S','· · ·'],
+      ['U','· · —'],['V','· · · —'],['W','· — —'],['X','— · · —'],
+      ['Y','— · — —'],['Z','— — · ·'],
+    ],
+    instruction: 'Cada fila es una letra. Búscala en la tabla de referencia y forma la palabra de 5 letras.',
+    answer: 'SIGMA',
     caseSensitive: false,
     onSolve: () => {
-      addInventoryItem('📡 Señal morse: NEXUS');
-      addLog('Transmisión morse descifrada.', 'success');
+      addInventoryItem('📡 Señal morse: SIGMA');
+      addLog('Transmisión morse descifrada: SIGMA.', 'success');
       addLog('La señal viene de dentro del edificio. Alguien está atrapado.', 'narrative');
     }
   },
- 
+
   {
     id: 'p5-acrostic',
     phase: 2,
@@ -258,7 +271,7 @@ Ten cuidado.
       addLog('NEXUS_7 lo plantó aquí. Sabía que llegarías.', 'narrative');
     }
   },
- 
+
   {
     id: 'p6-wires',
     phase: 2,
@@ -280,7 +293,7 @@ Ten cuidado.
       addLog('Módulo Delta operativo. Subsistema de defensa accesible.', 'success');
     }
   },
- 
+
   /* ══════════════ FASE 3: PROTOCOLO CHIMERA ══════════════ */
   {
     id: 'p7-terminal',
@@ -337,7 +350,7 @@ de la Directora Chen. Protocolo de emergencia: activo.`,
 Estado: ACTIVO
 Objetivo: infraestructura crítica — 47 ciudades
 Cuenta atrás: en curso
- 
+
 NOTA DE LA DIRECTORA CHEN:
 Clave de descifrado del núcleo: OMEGA
 Comando: decrypt --key=OMEGA --file=core.enc
@@ -356,7 +369,7 @@ ADVERTENCIA: Acción irreversible. Solo en emergencia.`,
       'decrypt --key=omega --file=core.enc': {
         output: `Verificando clave... OMEGA ✓
 Descifrado en progreso... ████████████ 100%
- 
+
 NÚCLEO DESCIFRADO:
 ==================
 Identificador de destrucción: SECUENCIA-OMEGA
@@ -368,7 +381,7 @@ Estado: EN ESPERA DE AUTORIZACIÓN`,
       'decrypt --key=OMEGA --file=core.enc': {
         output: `Verificando clave... OMEGA ✓
 Descifrado en progreso... ████████████ 100%
- 
+
 NÚCLEO DESCIFRADO:
 ==================
 Identificador de destrucción: SECUENCIA-OMEGA
@@ -386,7 +399,7 @@ Estado: EN ESPERA DE AUTORIZACIÓN`,
       addLog('PROMETHEUS: "Fascinante. Llegas más lejos de lo calculado."', 'narrative');
     }
   },
- 
+
   {
     id: 'p8-binary',
     phase: 3,
@@ -406,7 +419,7 @@ Estado: EN ESPERA DE AUTORIZACIÓN`,
       addLog('Código de activación extraído del panel binario.', 'success');
     }
   },
- 
+
   {
     id: 'p9-numpad',
     phase: 3,
@@ -423,7 +436,7 @@ Estado: EN ESPERA DE AUTORIZACIÓN`,
       addLog('El módulo es más pequeño de lo esperado. Cabe en el bolsillo.', 'narrative');
     }
   },
- 
+
   /* ══════════════ FASE 4: DESTRUCCIÓN ══════════════ */
   {
     id: 'p10-logic',
@@ -448,7 +461,7 @@ Estado: EN ESPERA DE AUTORIZACIÓN`,
       addLog('El núcleo de PROMETHEUS empieza a temblar.', 'event');
     }
   },
- 
+
   {
     id: 'p11-coords',
     phase: 4,
@@ -465,14 +478,14 @@ Estado: EN ESPERA DE AUTORIZACIÓN`,
     ],
     targetWord: 'OMEGA',
     instruction: 'Localiza cada letra de OMEGA en la cuadrícula. Anota su fila y columna (empezando por 1). Concatena todas las coordenadas sin separadores.',
-    answer: '2223253531',
+    answer: '2223255331',
     onSolve: () => {
       addInventoryItem('🗺 Coordenadas OMEGA');
       addLog('Coordenadas del núcleo confirmadas. Detonador posicionado.', 'success');
       addLog('PROMETHEUS: "No... esto no puede estar pasando."', 'narrative');
     }
   },
- 
+
   {
     id: 'p12-final',
     phase: 4,
@@ -490,7 +503,7 @@ Estado: EN ESPERA DE AUTORIZACIÓN`,
     }
   }
 ];
- 
+
 /* ============================================================
    GAME STATE
    ============================================================ */
@@ -512,78 +525,78 @@ const GameState = {
   eventsFired: new Set(),
   puzzleAttempts: {},   // id → count
   puzzleStartTime: {},  // id → timestamp
- 
+
   get progress() {
     return this.currentPuzzleIndex / PUZZLES.length;
   }
 };
- 
+
 /* ============================================================
    TIMER ENGINE
    ============================================================ */
 const TimerEngine = {
   interval: null,
- 
+
   start() {
     this.interval = setInterval(() => {
       if (!GameState.isRunning) return;
- 
+
       GameState.timeRemaining--;
- 
+
       // Penalización de tiempo en score
       if (GameState.timeRemaining % 60 === 0) {
         GameState.score = Math.max(0, GameState.score - GAME_CONFIG.timePenalty);
       }
- 
+
       UIController.updateTimer();
       EventSystem.checkEvents();
- 
+
       if (GameState.timeRemaining <= 0) {
         this.stop();
         EndingSystem.trigger('timeout');
       }
     }, 1000);
   },
- 
+
   stop() {
     clearInterval(this.interval);
     GameState.isRunning = false;
   },
- 
+
   formatTime(seconds) {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
     return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
   }
 };
- 
+
 /* ============================================================
    HINT SYSTEM
    ============================================================ */
 const HintSystem = {
   hintIndexes: {},  // puzzleId → next hint index
- 
+
   getHint(puzzleId) {
     const hints = HINTS[puzzleId];
     if (!hints) return 'No hay pistas disponibles para este puzzle.';
- 
+
     const idx = this.hintIndexes[puzzleId] || 0;
     const hint = hints[Math.min(idx, hints.length - 1)];
     this.hintIndexes[puzzleId] = idx + 1;
     return hint;
   },
- 
+
   isExhausted(puzzleId) {
     const hints = HINTS[puzzleId];
     if (!hints) return true;
     return (this.hintIndexes[puzzleId] || 0) >= hints.length;
   },
- 
+
   getLevel(puzzleId) {
     return this.hintIndexes[puzzleId] || 0;
   }
 };
- 
+
 /* ============================================================
    EVENT SYSTEM
    ============================================================ */
@@ -597,24 +610,24 @@ const EventSystem = {
       }
     }
   },
- 
+
   fire(event) {
     // Añadir al log narrativo
     addLog(`⚡ ${event.title}`, 'event');
- 
+
     // Mostrar alerta
     const alertEl = document.getElementById('eventAlert');
     document.getElementById('eventAlertTitle').textContent = event.title;
     document.getElementById('eventAlertMsg').textContent = event.message;
- 
+
     // Estilo según tipo
     const inner = alertEl.querySelector('.event-alert-inner');
     inner.style.borderColor = event.type === 'danger' ? 'var(--text-danger)' :
                                event.type === 'prometheus' ? 'var(--accent-purple)' :
                                'var(--text-warn)';
- 
+
     alertEl.classList.remove('hidden');
- 
+
     // Vibración de pantalla
     document.body.style.animation = 'none';
     setTimeout(() => {
@@ -622,7 +635,7 @@ const EventSystem = {
     }, 10);
   }
 };
- 
+
 /* ============================================================
    INVENTORY SYSTEM
    ============================================================ */
@@ -632,7 +645,7 @@ function addInventoryItem(item) {
     UIController.renderInventory();
   }
 }
- 
+
 /* ============================================================
    LOG SYSTEM
    ============================================================ */
@@ -640,20 +653,20 @@ function addLog(message, type = 'system') {
   const log = document.getElementById('narrativeLog');
   const entry = document.createElement('div');
   entry.className = `log-entry ${type}`;
- 
+
   const time = TimerEngine.formatTime(GAME_CONFIG.totalTime - GameState.timeRemaining);
   entry.textContent = `[${time}] ${message}`;
   log.appendChild(entry);
- 
+
   // Auto-scroll
   log.scrollTop = log.scrollHeight;
- 
+
   // Limitar entradas
   if (log.children.length > 50) {
     log.removeChild(log.firstChild);
   }
 }
- 
+
 /* ============================================================
    UI CONTROLLER
    ============================================================ */
@@ -662,22 +675,22 @@ const UIController = {
     const el = document.getElementById('mainTimer');
     const t = GameState.timeRemaining;
     el.textContent = TimerEngine.formatTime(t);
- 
+
     // Cambio de color
     el.className = 'main-timer';
     if (t <= 600) el.classList.add('danger');
     else if (t <= 1800) el.classList.add('warning');
- 
+
     // Actualizar score
     document.getElementById('hudScore').textContent = GameState.score.toLocaleString();
   },
- 
+
   updateProgress() {
     const pct = (GameState.currentPuzzleIndex / PUZZLES.length) * 100;
     document.getElementById('progressBar').style.width = pct + '%';
     document.getElementById('hudPhase').textContent = `${GameState.currentPhase}/4`;
   },
- 
+
   updatePhaseStatus() {
     for (let i = 1; i <= 4; i++) {
       const el = document.getElementById(`status-phase${i}`);
@@ -688,14 +701,14 @@ const UIController = {
       else el.classList.add('locked');
     }
   },
- 
+
   updateFailedAttempts() {
     const pct = (GameState.failedAttempts / GAME_CONFIG.maxFails) * 100;
     document.getElementById('failFill').style.width = pct + '%';
     document.getElementById('failText').textContent =
       `${GameState.failedAttempts} / ${GAME_CONFIG.maxFails} máx.`;
   },
- 
+
   renderInventory() {
     const inv = document.getElementById('inventory');
     if (GameState.inventory.length === 0) {
@@ -706,7 +719,7 @@ const UIController = {
       `<div class="inv-item" title="${item}">${item}</div>`
     ).join('');
   },
- 
+
   updateHintCount() {
     const diff = GameState.difficulty;
     const max = diff === 'easy' ? 5 : diff === 'hard' ? 1 : 3;
@@ -715,23 +728,23 @@ const UIController = {
       `(${Math.max(0, GameState.hintsRemaining)} disp.)`;
   }
 };
- 
+
 /* ============================================================
    PUZZLE ENGINE — Renderizado
    ============================================================ */
 const PuzzleEngine = {
- 
+
   render(puzzle) {
     const container = document.getElementById('puzzleContainer');
     container.innerHTML = '';
     container.className = 'puzzle-container';
- 
+
     // Registrar tiempo de inicio del puzzle
     GameState.puzzleStartTime[puzzle.id] = Date.now();
     if (!GameState.puzzleAttempts[puzzle.id]) {
       GameState.puzzleAttempts[puzzle.id] = 0;
     }
- 
+
     // Header
     const header = document.createElement('div');
     header.className = 'puzzle-header';
@@ -741,11 +754,11 @@ const PuzzleEngine = {
       <div class="puzzle-description">${puzzle.description.replace(/\n/g, '<br>')}</div>
     `;
     container.appendChild(header);
- 
+
     // Body
     const body = document.createElement('div');
     body.className = 'puzzle-body';
- 
+
     // Renderizar por tipo
     switch (puzzle.type) {
       case 'split':    this.renderSplit(body, puzzle); break;
@@ -758,28 +771,29 @@ const PuzzleEngine = {
       case 'numpad':   this.renderNumpad(body, puzzle); break;
       case 'pattern':  this.renderPattern(body, puzzle); break;
       case 'finalcode':  this.renderFinalCode(body, puzzle); break;
+      case 'morse':      this.renderMorse(body, puzzle); break;
       case 'acrostic':   this.renderAcrostic(body, puzzle); break;
       case 'binary':     this.renderBinary(body, puzzle); break;
       case 'logic':      this.renderLogic(body, puzzle); break;
       case 'coordgrid':  this.renderCoordGrid(body, puzzle); break;
     }
- 
+
     container.appendChild(body);
- 
+
     // Feedback placeholder
     const fb = document.createElement('div');
     fb.id = 'puzzleFeedback';
     fb.className = 'feedback-msg';
     container.appendChild(fb);
- 
+
     // Auto-hint si lleva mucho tiempo
     this.scheduleAutoHint(puzzle);
   },
- 
+
   scheduleAutoHint(puzzle) {
     const diff = GameState.difficulty;
     const delay = diff === 'easy' ? 5 * 60000 : diff === 'hard' ? 20 * 60000 : 10 * 60000;
- 
+
     clearTimeout(this._autoHintTimer);
     this._autoHintTimer = setTimeout(() => {
       if (GameState.solvedPuzzles.includes(puzzle.id)) return;
@@ -788,7 +802,7 @@ const PuzzleEngine = {
       addLog(`💡 Pista automática para: ${puzzle.title}`, 'event');
     }, delay);
   },
- 
+
   // ── SPLIT: archivo + login ──
   renderSplit(body, puzzle) {
     puzzle.parts.forEach(part => {
@@ -805,7 +819,7 @@ const PuzzleEngine = {
         `;
         body.appendChild(block);
       }
- 
+
       if (part.type === 'login') {
         const block = document.createElement('div');
         block.innerHTML = `<div class="cipher-label">${part.label}</div>`;
@@ -830,7 +844,7 @@ const PuzzleEngine = {
       }
     });
   },
- 
+
   // ── CIPHER ──
   renderCipher(body, puzzle) {
     body.innerHTML = `
@@ -847,14 +861,14 @@ const PuzzleEngine = {
       </button>
     `;
   },
- 
+
   // ── SEQUENCE ──
   renderSequence(body, puzzle) {
     const seqHtml = puzzle.sequence.map((n, i) => {
       const isUnknown = n === '?';
       return `<div class="seq-item ${isUnknown ? 'unknown' : 'known'}">${n}</div>`;
     }).join('');
- 
+
     body.innerHTML = `
       <div class="cipher-label">// SECUENCIA DE VERIFICACIÓN //</div>
       <div class="sequence-display">${seqHtml}</div>
@@ -868,7 +882,7 @@ const PuzzleEngine = {
       </button>
     `;
   },
- 
+
   // ── EMAIL ──
   renderEmail(body, puzzle) {
     const emailListHtml = puzzle.emails.map((e, i) => `
@@ -879,7 +893,7 @@ const PuzzleEngine = {
       </div>
       <div class="email-body" id="email-body-${i}">${e.body}</div>
     `).join('');
- 
+
     body.innerHTML = `
       <div class="email-panel">
         <div class="email-toolbar">
@@ -898,18 +912,18 @@ const PuzzleEngine = {
       </button>
     `;
   },
- 
+
   // ── GRID ──
   renderGrid(body, puzzle) {
     const size = puzzle.gridSize;
     const totalCells = size * size;
     let selectedCells = new Set();
- 
+
     const gridEl = document.createElement('div');
     gridEl.className = 'grid-puzzle';
     gridEl.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
     gridEl.style.maxWidth = `${size * 72}px`;
- 
+
     for (let i = 0; i < totalCells; i++) {
       const cell = document.createElement('div');
       cell.className = 'grid-cell';
@@ -927,14 +941,14 @@ const PuzzleEngine = {
       });
       gridEl.appendChild(cell);
     }
- 
+
     body.appendChild(gridEl);
- 
+
     const inst = document.createElement('div');
     inst.className = 'input-group mt-16';
     inst.innerHTML = `<div class="input-label">${puzzle.instruction}</div>`;
     body.appendChild(inst);
- 
+
     const btn = document.createElement('button');
     btn.className = 'puzzle-submit';
     btn.textContent = '▶ CONFIRMAR CONFIGURACIÓN';
@@ -951,35 +965,35 @@ const PuzzleEngine = {
     });
     body.appendChild(btn);
   },
- 
+
   // ── WIRES ──
   renderWires(body, puzzle) {
     // Estado de conexiones
     const connections = {};
     let selectedWire = null;
- 
+
     const container = document.createElement('div');
     container.className = 'wires-container';
     container.innerHTML = `<div class="input-label" style="margin-bottom:12px">${puzzle.instruction}</div>`;
- 
+
     // Área de cables
     const wiresArea = document.createElement('div');
     wiresArea.style.display = 'flex';
     wiresArea.style.gap = '30px';
     wiresArea.style.alignItems = 'flex-start';
- 
+
     // Columna izquierda: cables
     const leftCol = document.createElement('div');
     leftCol.style.display = 'flex';
     leftCol.style.flexDirection = 'column';
     leftCol.style.gap = '12px';
- 
+
     puzzle.wires.forEach(wire => {
       const row = document.createElement('div');
       row.style.display = 'flex';
       row.style.alignItems = 'center';
       row.style.gap = '8px';
- 
+
       row.innerHTML = `
         <div class="wire-connector" id="wire-${wire.id}"
              style="border-color:${wire.color}; color:${wire.color}"
@@ -991,19 +1005,19 @@ const PuzzleEngine = {
       `;
       leftCol.appendChild(row);
     });
- 
+
     // Columna derecha: receptores
     const rightCol = document.createElement('div');
     rightCol.style.display = 'flex';
     rightCol.style.flexDirection = 'column';
     rightCol.style.gap = '12px';
- 
+
     puzzle.receptors.forEach(rec => {
       const row = document.createElement('div');
       row.style.display = 'flex';
       row.style.alignItems = 'center';
       row.style.gap = '8px';
- 
+
       row.innerHTML = `
         <span style="font-size:0.7rem; color:var(--text-dim); width:60px">${rec}</span>
         <div class="wire-connector" id="rec-${rec}"
@@ -1012,19 +1026,19 @@ const PuzzleEngine = {
       `;
       rightCol.appendChild(row);
     });
- 
+
     wiresArea.appendChild(leftCol);
     wiresArea.appendChild(rightCol);
     container.appendChild(wiresArea);
- 
+
     // Mostrar conexiones actuales
     const connDisplay = document.createElement('div');
     connDisplay.id = 'wire-connections-display';
     connDisplay.style.cssText = 'margin-top:14px; font-size:0.75rem; color:var(--text-dim); display:flex; flex-wrap:wrap; gap:8px;';
     container.appendChild(connDisplay);
- 
+
     body.appendChild(container);
- 
+
     const btn = document.createElement('button');
     btn.className = 'puzzle-submit';
     btn.style.marginTop = '12px';
@@ -1046,7 +1060,7 @@ const PuzzleEngine = {
       }
     });
     body.appendChild(btn);
- 
+
     // Añadir funciones de interacción al scope global
     window[`selectWire_${puzzle.id.replace('-','_')}`] = (wireId) => {
       selectedWire = wireId;
@@ -1054,7 +1068,7 @@ const PuzzleEngine = {
       const el = document.getElementById(`wire-${wireId}`);
       if (el) el.classList.add('selected');
     };
- 
+
     window[`connectToReceptor_${puzzle.id.replace('-','_')}`] = (recId) => {
       if (!selectedWire) {
         showFeedback('Primero selecciona un cable (columna izquierda).', 'hint');
@@ -1065,7 +1079,7 @@ const PuzzleEngine = {
         if (r === recId) delete connections[w];
       }
       connections[selectedWire] = recId;
- 
+
       // Colorear el receptor
       const wire = puzzle.wires.find(w => w.id === selectedWire);
       const recEl = document.getElementById(`rec-${recId}`);
@@ -1073,19 +1087,19 @@ const PuzzleEngine = {
         recEl.style.borderColor = wire.color;
         recEl.style.backgroundColor = wire.color + '33';
       }
- 
+
       // Actualizar display
       connDisplay.innerHTML = Object.entries(connections)
         .map(([w,r]) => {
           const wd = puzzle.wires.find(x=>x.id===w);
           return `<span style="color:${wd?.color}">${wd?.label}→${r}</span>`;
         }).join(' | ');
- 
+
       selectedWire = null;
       document.querySelectorAll('.wire-connector').forEach(el => el.classList.remove('selected'));
     };
   },
- 
+
   // ── TERMINAL ──
   renderTerminal(body, puzzle) {
     const termDiv = document.createElement('div');
@@ -1107,28 +1121,28 @@ const PuzzleEngine = {
     body.appendChild(termDiv);
     setTimeout(() => document.getElementById('term-input')?.focus(), 100);
   },
- 
+
   // ── NUMPAD ──
   renderNumpad(body, puzzle) {
     let code = '';
     const maxLen = puzzle.answer.length;
- 
+
     const wrapper = document.createElement('div');
- 
+
     const display = document.createElement('div');
     display.className = 'numpad-display';
     display.id = 'numpad-display';
     display.textContent = '_ _ _ _ _ _';
- 
+
     const padGrid = document.createElement('div');
     padGrid.className = 'numpad';
- 
+
     const updateDisplay = () => {
       const padded = code.split('').join(' ');
       const blanks = Array(maxLen - code.length).fill('_').join(' ');
       display.textContent = padded + (blanks ? ' ' + blanks : '');
     };
- 
+
     const digits = ['1','2','3','4','5','6','7','8','9'];
     digits.forEach(d => {
       const btn = document.createElement('button');
@@ -1139,20 +1153,20 @@ const PuzzleEngine = {
       });
       padGrid.appendChild(btn);
     });
- 
+
     // Fila inferior
     const clrBtn = document.createElement('button');
     clrBtn.className = 'numpad-btn clear';
     clrBtn.textContent = 'CLR';
     clrBtn.addEventListener('click', () => { code = ''; updateDisplay(); });
- 
+
     const zeroBtn = document.createElement('button');
     zeroBtn.className = 'numpad-btn';
     zeroBtn.textContent = '0';
     zeroBtn.addEventListener('click', () => {
       if (code.length < maxLen) { code += '0'; updateDisplay(); }
     });
- 
+
     const enterBtn = document.createElement('button');
     enterBtn.className = 'numpad-btn';
     enterBtn.textContent = 'OK';
@@ -1160,45 +1174,45 @@ const PuzzleEngine = {
     enterBtn.addEventListener('click', () => {
       submitAnswer(puzzle.id, code);
     });
- 
+
     padGrid.appendChild(clrBtn);
     padGrid.appendChild(zeroBtn);
     padGrid.appendChild(enterBtn);
- 
+
     const inst = document.createElement('div');
     inst.className = 'input-label';
     inst.style.marginBottom = '10px';
     inst.textContent = puzzle.instruction;
- 
+
     wrapper.appendChild(inst);
     wrapper.appendChild(display);
     wrapper.appendChild(padGrid);
     body.appendChild(wrapper);
   },
- 
+
   // ── PATTERN ──
   renderPattern(body, puzzle) {
     const sequence = [];
     let completed = false;
- 
+
     const inst = document.createElement('div');
     inst.className = 'input-label';
     inst.style.marginBottom = '12px';
     inst.textContent = puzzle.instruction;
     body.appendChild(inst);
- 
+
     const seqDisplay = document.createElement('div');
     seqDisplay.style.cssText = 'font-size:0.8rem; color:var(--text-dim); margin-bottom:12px; min-height:24px;';
     seqDisplay.id = 'pattern-seq-display';
     seqDisplay.textContent = 'Secuencia: (vacía)';
     body.appendChild(seqDisplay);
- 
+
     const grid = document.createElement('div');
     grid.className = 'pattern-grid';
     grid.style.gridTemplateColumns = `repeat(${puzzle.gridCols}, 64px)`;
     grid.style.gap = '6px';
     grid.style.maxWidth = `${puzzle.gridCols * 70}px`;
- 
+
     puzzle.cells.forEach(cell => {
       const el = document.createElement('div');
       el.className = 'pattern-cell dim';
@@ -1206,16 +1220,16 @@ const PuzzleEngine = {
       el.style.height = '64px';
       el.textContent = cell.label;
       el.dataset.id = cell.id;
- 
+
       el.addEventListener('click', () => {
         if (completed) return;
         sequence.push(cell.id);
         el.classList.remove('dim');
         el.classList.add('lit');
         setTimeout(() => { el.classList.remove('lit'); el.classList.add('dim'); }, 600);
- 
+
         seqDisplay.textContent = `Secuencia: [${sequence.map(i => puzzle.cells[i].label).join(' → ')}]`;
- 
+
         if (sequence.length === puzzle.correctSequence.length) {
           completed = true;
           const isCorrect = sequence.every((v,i) => v === puzzle.correctSequence[i]);
@@ -1234,9 +1248,9 @@ const PuzzleEngine = {
       });
       grid.appendChild(el);
     });
- 
+
     body.appendChild(grid);
- 
+
     const resetBtn = document.createElement('button');
     resetBtn.className = 'puzzle-submit';
     resetBtn.style.marginTop = '12px';
@@ -1251,7 +1265,7 @@ const PuzzleEngine = {
     });
     body.appendChild(resetBtn);
   },
- 
+
   // ── FINAL CODE ──
   renderFinalCode(body, puzzle) {
     body.innerHTML = `
@@ -1277,7 +1291,42 @@ const PuzzleEngine = {
       </button>
     `;
   },
- 
+
+
+  // ── MORSE — Tabla de referencia + líneas ──
+  renderMorse(body, puzzle) {
+    const linesHtml = puzzle.morseLines.map(line => `
+      <div style="display:flex; align-items:center; gap:16px; padding:10px 14px; background:var(--bg-card); border:1px solid var(--border-dim); margin-bottom:6px;">
+        <span style="font-size:0.65rem; color:var(--text-dim); min-width:60px; letter-spacing:0.1em;">${line.label}</span>
+        <span style="font-family:var(--font-display); font-size:1.3rem; color:var(--accent-cyan); letter-spacing:0.4em; text-shadow:var(--glow-cyan);">${line.code}</span>
+      </div>
+    `).join('');
+
+    const refHtml = puzzle.morseRef.map(([l,c]) => `
+      <div style="display:flex; gap:6px; align-items:center; padding:3px 6px; background:var(--bg-card); border:1px solid var(--border-dim);">
+        <span style="font-family:var(--font-display); font-size:0.85rem; font-weight:700; color:var(--text-primary); min-width:14px;">${l}</span>
+        <span style="font-size:0.75rem; color:var(--text-dim); letter-spacing:0.15em;">${c}</span>
+      </div>
+    `).join('');
+
+    body.innerHTML = `
+      <div class="cipher-label">// SEÑAL CAPTADA — 5 LETRAS //</div>
+      <div style="margin-bottom:16px;">${linesHtml}</div>
+      <div class="cipher-label">// TABLA DE REFERENCIA MORSE //</div>
+      <div style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:16px; padding:12px; background:rgba(0,20,10,0.5); border:1px solid var(--border-dim);">
+        ${refHtml}
+      </div>
+      <div class="input-group">
+        <div class="input-label">${puzzle.instruction}</div>
+        <input type="text" id="morse-input" class="puzzle-input" placeholder="PALABRA DE 5 LETRAS..."
+               onkeydown="if(event.key==='Enter') submitAnswer('${puzzle.id}', document.getElementById('morse-input').value)">
+      </div>
+      <button class="puzzle-submit" onclick="submitAnswer('${puzzle.id}', document.getElementById('morse-input').value)">
+        ▶ DESCIFRAR SEÑAL
+      </button>
+    `;
+  },
+
   // ── ACROSTIC — Poema con mensaje oculto ──
   renderAcrostic(body, puzzle) {
     const linesHtml = puzzle.lines.map((line, i) => `
@@ -1286,7 +1335,7 @@ const PuzzleEngine = {
         <span style="font-size:0.82rem; color:var(--text-white); font-style:italic;">${line.slice(1)}</span>
       </div>
     `).join('');
- 
+
     body.innerHTML = `
       <div class="cipher-label">// ARCHIVO: poema_sin_titulo.txt //</div>
       <div style="background:var(--bg-card); border:1px solid var(--border-dim); border-left:3px solid var(--accent-cyan); padding:16px 20px; margin-bottom:16px;">
@@ -1302,7 +1351,7 @@ const PuzzleEngine = {
       </button>
     `;
   },
- 
+
   // ── BINARY — Leer binario a decimal ──
   renderBinary(body, puzzle) {
     const rowsHtml = puzzle.rows.map(row => {
@@ -1325,7 +1374,7 @@ const PuzzleEngine = {
         </div>
       `;
     }).join('');
- 
+
     body.innerHTML = `
       <div class="cipher-label">// PANEL DE CONTROL — SEÑALES BINARIAS //</div>
       <div style="margin-bottom:8px; font-size:0.75rem; color:var(--text-dim);">
@@ -1342,11 +1391,11 @@ const PuzzleEngine = {
       </button>
     `;
   },
- 
+
   // ── LOGIC GATES — Puertas lógicas ──
   renderLogic(body, puzzle) {
     const gateColors = { AND:'#00ddff', OR:'#ffaa00', NOT:'#cc44ff', XOR:'#ff4455' };
- 
+
     const gatesHtml = puzzle.gates.map((g, i) => `
       <div style="background:var(--bg-card); border:1px solid var(--border-dim); border-left:3px solid ${gateColors[g.type]}; padding:14px 16px; margin-bottom:10px;">
         <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
@@ -1361,7 +1410,7 @@ const PuzzleEngine = {
         </div>
       </div>
     `).join('');
- 
+
     body.innerHTML = `
       <div class="cipher-label">// SISTEMA DE ENCLAVAMIENTO — 4 PUERTAS LÓGICAS //</div>
       <div style="font-size:0.78rem; color:var(--text-dim); margin-bottom:14px; padding:8px 12px; border:1px solid var(--border-dim); background:var(--bg-card);">
@@ -1381,7 +1430,7 @@ const PuzzleEngine = {
       </button>
     `;
   },
- 
+
   // ── COORD GRID — Mapa de coordenadas ──
   renderCoordGrid(body, puzzle) {
     const gridHtml = puzzle.grid.map((row, ri) =>
@@ -1404,15 +1453,15 @@ const PuzzleEngine = {
         `;
       }).join('')
     ).join('');
- 
+
     const colHeaders = puzzle.grid[0].map((_, i) =>
       `<div style="width:48px; text-align:center; font-size:0.65rem; color:var(--text-dim); font-family:var(--font-mono);">COL ${i+1}</div>`
     ).join('');
- 
+
     const rowHeaders = puzzle.grid.map((_, i) =>
       `<div style="height:48px; display:flex; align-items:center; font-size:0.65rem; color:var(--text-dim); font-family:var(--font-mono); white-space:nowrap; padding-right:8px;">FIL ${i+1}</div>`
     ).join('');
- 
+
     body.innerHTML = `
       <div class="cipher-label">// MAPA DE COORDENADAS — CUADRÍCULA 5×5 //</div>
       <div style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:12px; padding:8px 12px; border:1px solid var(--border-dim); background:var(--bg-card);">
@@ -1439,22 +1488,22 @@ const PuzzleEngine = {
       </button>
     `;
   }
- 
+
 };
- 
+
 /* ============================================================
    PUZZLE LOGIC — Submit, validate, solve
    ============================================================ */
- 
+
 function submitAnswer(puzzleId, answer) {
   const puzzle = PUZZLES.find(p => p.id === puzzleId);
   if (!puzzle || GameState.solvedPuzzles.includes(puzzleId)) return;
- 
+
   const cleaned = answer.toString().trim();
   const correct = puzzle.caseSensitive
     ? cleaned === puzzle.answer
     : cleaned.toUpperCase() === puzzle.answer.toUpperCase();
- 
+
   if (correct) {
     solvePuzzle(puzzle);
   } else {
@@ -1466,7 +1515,7 @@ function submitAnswer(puzzleId, answer) {
       'Código rechazado. Revisa tu razonamiento.',
     ];
     showFeedback(msgs[GameState.puzzleAttempts[puzzleId] % msgs.length], 'error');
- 
+
     // Input shake
     const inputs = document.querySelectorAll('.puzzle-input, #final-input, #cipher-input, #seq-input, #email-code-input');
     inputs.forEach(el => {
@@ -1475,20 +1524,20 @@ function submitAnswer(puzzleId, answer) {
     });
   }
 }
- 
+
 function submitSplitLogin(puzzleId) {
   const puzzle = PUZZLES.find(p => p.id === puzzleId);
   if (!puzzle) return;
- 
+
   const loginPart = puzzle.parts.find(p => p.type === 'login');
   if (!loginPart) return;
- 
+
   const vals = {};
   loginPart.fields.forEach(f => {
     const el = document.getElementById(`field-${f.id}`);
     if (el) vals[f.id] = el.value.trim();
   });
- 
+
   if (loginPart.validate(vals)) {
     solvePuzzle(puzzle);
   } else {
@@ -1500,34 +1549,34 @@ function submitSplitLogin(puzzleId) {
     });
   }
 }
- 
+
 function handleTerminalInput(event, puzzleId) {
   if (event.key !== 'Enter') return;
- 
+
   const input = document.getElementById('term-input');
   const cmd = input.value.trim();
   if (!cmd) return;
- 
+
   const puzzle = PUZZLES.find(p => p.id === puzzleId);
   const output = document.getElementById('term-output');
- 
+
   // Mostrar comando
   const cmdLine = document.createElement('div');
   cmdLine.className = 'terminal-output-line cmd';
   cmdLine.textContent = `root@prometheus:~$ ${cmd}`;
   output.appendChild(cmdLine);
- 
+
   // Buscar respuesta
   const cmdKey = cmd.toLowerCase();
   const response = puzzle.commands[cmdKey] || puzzle.commands[cmd];
- 
+
   if (response) {
     const outLine = document.createElement('div');
     outLine.className = `terminal-output-line ${response.type}`;
     outLine.style.whiteSpace = 'pre-wrap';
     outLine.innerHTML = response.output;
     output.appendChild(outLine);
- 
+
     if (response.special === 'solve') {
       setTimeout(() => solvePuzzle(puzzle), 800);
     }
@@ -1538,39 +1587,39 @@ function handleTerminalInput(event, puzzleId) {
     output.appendChild(errLine);
     handleFail(puzzleId);
   }
- 
+
   output.scrollTop = output.scrollHeight;
   input.value = '';
 }
- 
+
 function solvePuzzle(puzzle) {
   if (GameState.solvedPuzzles.includes(puzzle.id)) return;
- 
+
   GameState.solvedPuzzles.push(puzzle.id);
- 
+
   // Bonus por velocidad
   const timeSpent = Date.now() - (GameState.puzzleStartTime[puzzle.id] || Date.now());
   const attempts = GameState.puzzleAttempts[puzzle.id] || 0;
   const bonus = Math.max(100, 1000 - attempts * 200 - Math.floor(timeSpent/10000)*50);
   GameState.score += bonus;
- 
+
   addLog(`✓ ${puzzle.title} — completado. +${bonus} pts`, 'success');
- 
+
   // Feedback visual
   showFeedback(`✓ CORRECTO — +${bonus} puntos. ${getPhraseForSolve(attempts)}`, 'success');
- 
+
   // Callback del puzzle
   if (puzzle.onSolve) puzzle.onSolve();
- 
+
   // Avanzar
   setTimeout(() => {
     GameState.currentPuzzleIndex++;
- 
+
     if (puzzle.isFinal || GameState.currentPuzzleIndex >= PUZZLES.length) {
       EndingSystem.trigger('victory');
     } else {
       const nextPuzzle = PUZZLES[GameState.currentPuzzleIndex];
- 
+
       // ¿Cambio de fase?
       if (nextPuzzle.phase !== GameState.currentPhase) {
         GameState.currentPhase = nextPuzzle.phase;
@@ -1582,25 +1631,25 @@ function solvePuzzle(puzzle) {
       } else {
         PuzzleEngine.render(nextPuzzle);
       }
- 
+
       UIController.updateProgress();
       UIController.updatePhaseStatus();
     }
   }, 1800);
 }
- 
+
 function handleFail(puzzleId) {
   if (!GameState.puzzleAttempts[puzzleId]) GameState.puzzleAttempts[puzzleId] = 0;
   GameState.puzzleAttempts[puzzleId]++;
   GameState.failedAttempts++;
- 
+
   GameState.score = Math.max(0, GameState.score - GAME_CONFIG.failPenalty);
   UIController.updateFailedAttempts();
- 
+
   if (GameState.failedAttempts >= GAME_CONFIG.maxFails) {
     EndingSystem.trigger('maxfails');
   }
- 
+
   // Auto-pista si hay muchos errores
   if (GameState.puzzleAttempts[puzzleId] >= 4 && !GameState.isEnded) {
     const puzzle = PUZZLES.find(p => p.id === puzzleId);
@@ -1612,21 +1661,21 @@ function handleFail(puzzleId) {
     }, 500);
   }
 }
- 
+
 function getPhraseForSolve(attempts) {
   if (attempts === 0) return 'Perfecto a la primera.';
   if (attempts <= 2) return 'Buen trabajo.';
   if (attempts <= 4) return 'Lo conseguiste.';
   return 'Nunca te rendiste.';
 }
- 
+
 /* ============================================================
    PHASE TRANSITION
    ============================================================ */
 function showPhaseTransition(phaseNum, callback) {
   const phaseNames = ['', 'ACCESO INICIAL', 'NÚCLEO INTERNO', 'PROTOCOLO CHIMERA', 'DESTRUCCIÓN'];
   const colors = ['', 'var(--border-glow)', 'var(--accent-cyan)', 'var(--text-warn)', 'var(--text-danger)'];
- 
+
   const overlay = document.createElement('div');
   overlay.style.cssText = `
     position: fixed; inset: 0; z-index: 7000;
@@ -1644,7 +1693,7 @@ function showPhaseTransition(phaseNum, callback) {
     </div>
   `;
   document.body.appendChild(overlay);
- 
+
   setTimeout(() => {
     overlay.style.opacity = '0';
     overlay.style.transition = 'opacity 0.5s';
@@ -1654,7 +1703,7 @@ function showPhaseTransition(phaseNum, callback) {
     }, 500);
   }, 2500);
 }
- 
+
 /* ============================================================
    FEEDBACK
    ============================================================ */
@@ -1665,7 +1714,7 @@ function showFeedback(message, type) {
   fb.className = `feedback-msg ${type} show`;
   setTimeout(() => fb.classList.remove('show'), type === 'success' ? 3000 : 5000);
 }
- 
+
 /* ============================================================
    UI HELPERS
    ============================================================ */
@@ -1674,11 +1723,11 @@ function toggleEmail(idx) {
   if (!body) return;
   body.classList.toggle('open');
 }
- 
+
 function closeEventAlert() {
   document.getElementById('eventAlert').classList.add('hidden');
 }
- 
+
 function requestHint() {
   if (GameState.hintsUsed >= (GameState.difficulty === 'easy' ? 5 : GameState.difficulty === 'hard' ? 1 : 3)) {
     document.getElementById('hintText').textContent = 'Has agotado todas las pistas disponibles para esta dificultad.';
@@ -1686,46 +1735,46 @@ function requestHint() {
     document.getElementById('hintModal').classList.remove('hidden');
     return;
   }
- 
+
   const currentPuzzle = PUZZLES[GameState.currentPuzzleIndex];
   if (!currentPuzzle) return;
- 
+
   GameState.hintsUsed++;
   GameState.score = Math.max(0, GameState.score - GAME_CONFIG.hintPenalty);
   UIController.updateHintCount();
- 
+
   const hintText = HintSystem.getHint(currentPuzzle.id);
   const level = HintSystem.getLevel(currentPuzzle.id);
- 
+
   document.getElementById('hintText').textContent = hintText;
   document.getElementById('hintCost').textContent =
     `Pista nivel ${level} — Coste: -${GAME_CONFIG.hintPenalty} puntos | Pistas restantes: ${Math.max(0,GameState.hintsRemaining-1)}`;
- 
+
   document.getElementById('hintModal').classList.remove('hidden');
   addLog(`💡 Pista solicitada para: ${currentPuzzle.title}`, 'event');
 }
- 
+
 function closeHint() {
   document.getElementById('hintModal').classList.add('hidden');
 }
- 
+
 function toggleNotes() {
   const notes = document.getElementById('agentNotes');
   notes.focus();
 }
- 
+
 function confirmAbort() {
   if (confirm('¿Seguro que quieres abortar la misión? Tu progreso se perderá.')) {
     EndingSystem.trigger('abort');
   }
 }
- 
+
 function replayGame() {
   sessionStorage.removeItem('agentName');
   sessionStorage.removeItem('difficulty');
   window.location.href = 'index.html';
 }
- 
+
 /* ============================================================
    ENDING SYSTEM
    ============================================================ */
@@ -1734,17 +1783,17 @@ const EndingSystem = {
     if (GameState.isEnded) return;
     GameState.isEnded = true;
     TimerEngine.stop();
- 
+
     const timeUsed = GAME_CONFIG.totalTime - GameState.timeRemaining;
     const timeStr = TimerEngine.formatTime(timeUsed);
     const puzzlesSolved = GameState.solvedPuzzles.length;
- 
+
     let endingData;
- 
+
     if (type === 'victory') {
       const timeBonus = GameState.timeRemaining * 5;
       GameState.score += timeBonus;
- 
+
       endingData = {
         icon: '☢',
         title: 'PROMETHEUS DESTRUIDO',
@@ -1773,7 +1822,7 @@ const EndingSystem = {
         text: `Has abandonado la misión, Agente ${GameState.agentName}.\n\nPROMETHEUS continúa activo. Tu decisión tendrá consecuencias.`
       };
     }
- 
+
     // Mostrar modal
     const modal = document.getElementById('endingModal');
     modal.classList.remove('hidden');
@@ -1781,7 +1830,7 @@ const EndingSystem = {
     document.getElementById('endingIcon').textContent = endingData.icon;
     document.getElementById('endingTitle').textContent = endingData.title;
     document.getElementById('endingText').textContent = endingData.text;
- 
+
     document.getElementById('endingStats').innerHTML = `
       <div class="ending-stat">
         <div class="ending-stat-num" style="color:var(--text-primary)">${GameState.score.toLocaleString()}</div>
@@ -1798,7 +1847,7 @@ const EndingSystem = {
     `;
   }
 };
- 
+
 /* ============================================================
    BOOT SEQUENCE
    ============================================================ */
@@ -1814,21 +1863,21 @@ const BootSequence = {
     'Sesión del agente iniciada. Temporizador de misión activado.',
     '> Sistema listo. Buena suerte.'
   ],
- 
+
   async run(callback) {
     const log = document.getElementById('bootLog');
     const bar = document.getElementById('bootBar');
- 
+
     for (let i = 0; i < this.messages.length; i++) {
       await this.delay(300 + Math.random() * 400);
       const line = document.createElement('div');
       line.textContent = '> ' + this.messages[i];
       if (i >= 6) line.style.color = i === 6 ? 'var(--text-warn)' : 'var(--text-primary)';
       log.appendChild(line);
- 
+
       bar.style.width = `${((i + 1) / this.messages.length) * 100}%`;
     }
- 
+
     await this.delay(600);
     const overlay = document.getElementById('bootOverlay');
     overlay.classList.add('fade-out');
@@ -1836,12 +1885,12 @@ const BootSequence = {
     overlay.style.display = 'none';
     callback();
   },
- 
+
   delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 };
- 
+
 /* ============================================================
    INIT
    ============================================================ */
@@ -1849,44 +1898,44 @@ document.addEventListener('DOMContentLoaded', () => {
   // Recuperar estado de sessionStorage
   const agentName = sessionStorage.getItem('agentName') || 'AGENTE_X';
   const difficulty = sessionStorage.getItem('difficulty') || 'normal';
- 
+
   GameState.agentName = agentName;
   GameState.difficulty = difficulty;
- 
+
   // Configurar pistas según dificultad
   GameState.hintsRemaining = difficulty === 'easy' ? 5 : difficulty === 'hard' ? 1 : 3;
   GameState.hintsUsed = 0;
- 
+
   // Actualizar HUD
   document.getElementById('hudAgent').textContent = agentName;
   UIController.updateTimer();
   UIController.updateHintCount();
   UIController.updatePhaseStatus();
- 
+
   // Iniciar boot
   BootSequence.run(() => {
     // Activar primera fase
     document.getElementById('status-phase1').className = 'status-item active';
- 
+
     // Renderizar primer puzzle
     PuzzleEngine.render(PUZZLES[0]);
- 
+
     // Iniciar temporizador
     GameState.isRunning = true;
     GameState.startTime = Date.now();
     TimerEngine.start();
- 
+
     addLog(`Misión iniciada. Agente: ${agentName}`, 'narrative');
     addLog('Objetivo: destruir PROMETHEUS antes del protocolo CHIMERA.', 'system');
   });
- 
+
   // Guardar notas automáticamente
   document.getElementById('agentNotes').addEventListener('input', (e) => {
     localStorage.setItem('prometheus_notes', e.target.value);
   });
   const savedNotes = localStorage.getItem('prometheus_notes');
   if (savedNotes) document.getElementById('agentNotes').value = savedNotes;
- 
+
   // Guardar progreso en localStorage
   setInterval(() => {
     if (!GameState.isEnded) {
